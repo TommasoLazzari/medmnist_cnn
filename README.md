@@ -1,32 +1,62 @@
 # MedMNIST CNN
 
-Technical pipeline for training and evaluating CNN models on BloodMNIST.
+A comparative study of lightweight convolutional neural networks for blood cell classification on the BloodMNIST dataset.
 
-## Authors
+The project investigates how architectural components such as data augmentation, batch normalization, spatial attention, and transfer learning affect predictive performance, computational cost, and inference efficiency. Starting from a simple two-layer CNN, progressively more complex architectures are evaluated under identical training and evaluation conditions.
 
-Ludergnani Brenno
+## Dataset
 
-Lazzari Tommaso
+The experiments are conducted on **BloodMNIST**, a multi-class medical image classification benchmark from the MedMNIST collection.
 
-## Project structure
+* 8 blood cell classes
+* RGB images
+* Resolution: 64 × 64
+* Official train/validation/test splits
 
-* `main.py`: evaluation script. Loads trained models from `saved\\\\\\\_models/`, computes test metrics, saves confusion matrices and `results/comparison\\\\\\\_results.json`.
-* `train.py`: training script. Loads BloodMNIST, builds selected models, trains them, saves `.keras` models, learning curves, and metadata JSON files.
-* `utils/data\\\\\\\_loader.py`: downloads BloodMNIST, scales images to `\\\\\\\[0,1]`, standardizes them using training-set channel statistics, and creates `tf.data.Dataset` objects.
-* `utils/visualization.py`: functions for learning curves, confusion matrices, and ROC plots.
-* `models/`: model definitions:
+## Models
 
-  * `baseline\\\\\\\_cnn.py`: basic 2-block CNN.
-  * `augmented\\\\\\\_cnn.py`: baseline CNN with data augmentation.
-  * `bn\\\\\\\_cnn.py`: augmented CNN with Batch Normalization.
-  * `attention\\\\\\\_cnn.py`: augmented BN-CNN with spatial attention.
-  * `bn\\\\\\\_noaug\\\\\\\_cnn.py`: BN-CNN without augmentation.
-  * `attention\\\\\\\_noaug\\\\\\\_cnn.py`: BN-CNN with spatial attention, without augmentation.
-  * `resnet50\\\\\\\_transfer.py`: frozen ImageNet ResNet50 backbone with custom classifier head.
-* `results/`: generated metrics, metadata, learning curves, and confusion matrices.
-* `saved\\\\\\\_models/`: trained Keras models.
+| Model | Description                      |
+| ----- | -------------------------------- |
+| A     | Baseline CNN                     |
+| B     | Baseline CNN + Data Augmentation |
+| C     | Model B + Batch Normalization    |
+| D     | Model C + Spatial Attention      |
+| E     | Model A + Batch Normalization    |
+| F     | Model E + Spatial Attention      |
+| G     | ResNet50 Transfer Learning       |
 
-## Requirements
+## Repository Structure
+
+```text
+medmnist_cnn/
+│
+├── main.py          # evaluation and model comparison
+├── train.py                       # training pipeline
+├── Report.pdf         # project report
+│
+├── utils/
+│   ├── data_loader.py             # dataset loading and preprocessing
+│   └── visualization.py           # training and evaluation plots
+│
+├── models/
+│   ├── baseline_cnn.py
+│   ├── augmented_cnn.py
+│   ├── bn_cnn.py
+│   ├── attention_cnn.py
+│   ├── bn_noaug_cnn.py
+│   ├── attention_noaug_cnn.py
+│   └── resnet50_transfer.py
+│
+├── saved_models/                  # trained models (.keras)
+│
+└── results/
+    ├── comparison_results.json
+    ├── metadata_*.json
+    ├── curves/
+    └── evaluation/
+```
+
+## Installation
 
 ```bash
 pip install tensorflow numpy matplotlib scikit-learn medmnist
@@ -34,7 +64,7 @@ pip install tensorflow numpy matplotlib scikit-learn medmnist
 
 ## Training
 
-Train all models:
+Train all architectures:
 
 ```bash
 python train.py --model all --epochs 50 --batch-size 64 --seed 42
@@ -43,40 +73,33 @@ python train.py --model all --epochs 50 --batch-size 64 --seed 42
 Train a single model:
 
 ```bash
-python train.py --model A --epochs 50 --batch-size 64 --seed 42
+python train.py --model A
 ```
-
-Available model keys: `A`, `B`, `C`, `D`, `E`, `F`, `G`.
 
 ## Evaluation
 
-After training, run:
+After training, evaluate all saved models:
 
 ```bash
-python Ludergnani\\\\\\\_Lazzari.py
+python main.py
 ```
 
-This evaluates all saved models in `saved\\\\\\\_models/` and writes:
+The script computes:
+
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* ROC-AUC
+* Inference latency
+* Confusion matrices
+
+and stores the results inside the `results/` directory.
+
+## Report
+
+A detailed description of the methodology, experiments, and results is available in:
 
 ```text
-results/comparison\\\\\\\_results.json
-results/evaluation/\\\\\\\*\\\\\\\_confusion\\\\\\\_matrix.png
+Report.pdf
 ```
-
-## Outputs
-
-Training produces:
-
-```text
-saved\\\\\\\_models/model\\\\\\\_<letter>.keras
-results/metadata\\\\\\\_<letter>.json
-results/curves/\\\\\\\*\\\\\\\_history.png
-```
-
-Evaluation produces:
-
-```text
-results/comparison\\\\\\\_results.json
-results/evaluation/\\\\\\\*\\\\\\\_confusion\\\\\\\_matrix.png
-```
-
